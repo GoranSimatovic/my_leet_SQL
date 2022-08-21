@@ -1,0 +1,54 @@
+WITH flaggedQuartersData AS
+(
+    SELECT product_id, sale_date,
+           SUM(CASE WHEN QUARTER(sale_date) = 1 THEN 1 ELSE 0 END) AS inFirstQrt,
+           SUM(CASE WHEN QUARTER(sale_date) != 1 THEN 1 ELSE 0 END) AS notInFirstQrt
+    FROM Sales
+    GROUP BY product_id
+)
+
+SELECT product_id, product_name
+FROM Product
+WHERE product_id IN (
+        SELECT product_id
+        FROM flaggedQuartersData
+        WHERE YEAR(sale_date) = 2019
+        AND inFirstQrt>0
+        AND notInFirstQrt=0
+
+)
+
+
+
+
+
+
+
+
+
+/*
+WITH flaggedData AS
+(
+    SELECT product_id, 
+        SUM(CASE
+            WHEN sale_date BETWEEN '2019-01-01' AND '2019-03-30' THEN 1
+            ELSE 0 END) sumFlagSpringSale,
+        SUM(CASE
+            WHEN sale_date NOT BETWEEN '2019-01-01' AND '2019-03-30' THEN 1
+            ELSE 0 END) sumflagNotSpringSale
+    FROM Sales
+    GROUP BY product_id
+),
+
+onlySpringSale AS
+(
+    SELECT product_id
+    FROM flaggedData
+    WHERE sumFlagSpringSale>0 AND sumflagNotSpringSale=0
+)
+
+SELECT o.product_id, p.product_name
+FROM onlySpringSale o
+JOIN Product p
+ON p.product_id = o.product_id;
+*/
