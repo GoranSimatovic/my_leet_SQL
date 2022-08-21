@@ -1,0 +1,52 @@
+WITH goodUsers AS
+(
+SELECT users_id FROM Users WHERE banned = 'No'
+),
+goodUserData AS
+(
+SELECT id, request_at, Trips.status
+FROM Trips
+WHERE driver_id IN (SELECT users_id FROM goodUsers)
+AND client_id IN (SELECT users_id FROM goodUsers)
+)
+
+SELECT request_at AS 'Day',
+ROUND(
+    SUM(CASE WHEN goodUserData.status != 'completed' THEN 1 ELSE 0 END)
+    /
+    COUNT(DISTINCT id)
+    ,2) AS 'Cancellation Rate'
+FROM goodUserData
+GROUP BY request_at
+HAVING request_at 
+BETWEEN "2013-10-01" AND "2013-10-03";
+
+
+
+
+
+
+
+
+
+
+#WITH bannedDrivers AS
+#(
+#SELECT users_id FROM Users WHERE banned = 'Yes'
+#),
+#
+#dayCounts AS
+#(
+#    SELECT client_id, driver_id, request_at,
+#        SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) AS goodRide, 
+#        SUM(CASE WHEN status = 'completed' THEN 0 ELSE 1 END) AS badRide
+#        FROM Trips
+#        WHERE client_id NOT IN (SELECT * FROM bannedDrivers)
+#        AND driver_id NOT IN (SELECT * FROM bannedDrivers)
+#        GROUP BY request_at
+#        HAVING request_at 
+#        BETWEEN "2013-10-01" AND "2013-10-03"
+#)
+#
+#SELECT request_at AS 'Day', ROUND(badRide/(goodRide+badRide),2) AS 'Cancellation Rate'
+#FROM dayCounts;
