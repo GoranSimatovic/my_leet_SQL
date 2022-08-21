@@ -1,0 +1,38 @@
+WITH joinedData AS
+(
+SELECT e.name, e.salary, d.name AS 'Department',
+    DENSE_RANK() OVER( PARTITION BY d.name ORDER BY e.salary DESC) AS emplRank
+    FROM Employee AS e
+    LEFT OUTER JOIN
+    Department AS d
+    ON e.departmentId = d.id
+)
+
+SELECT Department, name AS 'Employee', salary as 'Salary'
+FROM joinedData
+WHERE emplRank<=3
+ORDER BY Department, salary DESC
+
+
+
+
+
+#WITH namedDeptData AS
+#(
+#    SELECT d.name AS 'Department', e.name AS 'Employee', e.salary AS Salary
+#    FROM Employee e JOIN Department d
+#    ON e.departmentId = d.id
+#),
+#
+#DeptPayData AS
+#(
+#    SELECT DISTINCT Department, Salary, 
+#    DENSE_RANK() OVER(
+#    PARTITION BY Department
+#    ORDER BY Salary DESC) AS salaryRank
+#    FROM namedDeptData    
+#)
+#
+#SELECT Department, Employee, Salary
+#FROM namedDeptData n
+#WHERE Salary >= (SELECT  MIN(Salary) FROM DeptPayData dp WHERE n.Department = dp.Department #AND dp.salaryRank <= 3)
