@@ -1,0 +1,52 @@
+WITH rankedSalaries AS
+(
+SELECT name, salary, departmentId,
+    MAX(salary) OVER(PARTITION BY departmentId) AS maxDeptSalary
+FROM Employee
+)
+
+SELECT d.name AS 'Department', r.name AS 'Employee', r.salary AS 'Salary'
+FROM Department d, rankedSalaries r
+WHERE (r.departmentId = d.id AND r.salary = r.maxDeptSalary)
+;
+
+
+
+
+#WITH namedDepartmentData AS
+#(
+#    SELECT d.name as 'Department', e.name AS 'Employee', e.salary AS Salary
+#    FROM Employee e JOIN Department d
+#    ON e.departmentId = d.id   
+#)
+#
+#SELECT *
+#FROM namedDepartmentData n1
+#WHERE Salary = (SELECT MAX(Salary) FROM namedDepartmentData n2 WHERE n2.Department = #n1.Department);
+
+
+
+
+
+#
+#WITH namedTable AS
+#(
+#SELECT Employee.id, Employee.name, salary,Department.name AS 'Department' FROM Employee JOIN #Department ON Employee.departmentId = Department.id
+#),
+
+
+#bigSalary AS
+#(
+#SELECT MAX(salary) AS maxDepSal, Department
+#    FROM namedTable
+#    GROUP BY Department
+#)
+
+#SELECT Department, Employee, salary AS 'Salary'
+#FROM 
+#(
+#    SELECT namedTable.Department, namedTable.name AS Employee, salary AS 'Salary', maxDepSal
+#    FROM namedTable JOIN bigSalary ON namedTable.Department = bigSalary.Department
+# ) AS bigTable
+#WHERE salary = maxDepSal;
+
